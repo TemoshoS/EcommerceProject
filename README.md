@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # temosh
 =======
 # project
@@ -12,3 +13,6 @@
 =======
 # backendApplication
 >>>>>>> 8e95b3393c10710d2633fbf28aff3265e448e317
+=======
+# backend
+>>>>>>> 076c6d7527278eab756be2587dc8871f696384bb
