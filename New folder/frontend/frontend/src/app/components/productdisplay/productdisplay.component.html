@@ -1,0 +1,28 @@
+<div class="form-group">
+   <input type="text" class="form-control" style="background-color:Silver; width:600px;" placeholder="Search product" [(ngModel)]="term">
+</div>
+           <div *ngFor="let product of allProducts | filter:term" >
+             
+              <img src="data:image/png;base64,{{product.logo}}" width="400px;" height="400px;"/>
+             
+            
+              <p>Product ID:{{product.id}} </p>
+            
+            
+              <p>Product Name:{{product.prodname}}</p>
+              
+            
+              <p>Price: {{product.prodprice | currency:'R'}}</p>
+              
+            
+              <p>Product Description: {{ product.proddecription}}</p>
+              
+            
+                 
+              <button type="submit"   class="btn  btn-success" (click)="OnAddCart(product)">Add to cart</button>
+       
+                  
+              <button (click)="deleteProduct(product.id)" class="btn btn-danger"  >Delete</button>
+          
+           </div>
+
