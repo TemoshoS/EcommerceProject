@@ -15,7 +15,7 @@
   <div class="card-body">
     
 <h1 style="color: rgba(45, 85, 79, 0.548)">Items in your cart<span style="margin-left: 5%;margin-right: 22%;color: rgba(45, 85, 79, 0.548)">
-        Total value is: {{totalSum || "0"}}</span>
+        Total value is: {{allTotal|| "0"}}</span>
 <button class="btn btn-secondary" style="text-align : bold;" (click)="acc.toggle('static-2')">Checkout</button>
 </h1>
         
@@ -26,19 +26,19 @@
             <th>Name </th>
             <th>Price</th>
             <th>Quantity</th>
-            <th>Add and Remove</th>
+            <th>Remove And Add </th>
             <th>Total For Items</th>
           </tr>
           </thead>
           <tr *ngFor="let prod of productAddedTocart;let q = index">
-            <td><img src="data:image/png;base64,{{prod.logo}}" width="250px;" height="270px;"/></td>
+            <td><img src="data:image/png;base64,{{prod.logo}}" width="250px;" height="200px;"/></td>
             <td class="text-center">{{prod.prodname}}</td>
-            <td>{{prod.prodprice }}</td>
+            <td>{{prod.prodprice | currency:'R'  }}</td>
             <td>{{prod.prodquantity}}</td>
             <td>
               <div class="form-inline">
               <button type="button" (click)="onRemoveQuantity(prod)" class="btn btn-info">-</button> 
-              <input type="text"  [ngModel] ="prod.Quantity" (ngModelChange) ="prod.prodquantity=$event" class="form-control form-inline" id="count">
+              <input type="text"  [ngModel] ="prod.prodquantity" (ngModelChange) ="prod.prodquantity=$event" class="form-control form-inline" id="count">
               <button type="button" (click)="onAddQuantity(prod)" class="btn btn-info">+</button>
               </div>
             </td>
@@ -52,93 +52,53 @@
 </ngb-panel>
 
 
-
-
-
-
-
+<!--orders-->
 <ngb-panel id="static-2">
-  <ng-template ngbPanelTitle>
-    <span><b style="color: silver">Delivery Address </b></span>
-  </ng-template>
-
-  
-    
-
-  <ng-template ngbPanelContent>
-
-    
-    <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate >  
-
-      <div class="form-group">  
-        <label for="PostalCode" class="col-md-4" style="color: silver"><b>Postal Code</b></label>  
-        <input type="text" class="form-control" name="PostalCode" [(ngModel)]="form.PostalCode" #PostalCode="ngModel" required />
-        
-      </div>
-       
-
-      <div class="form-group">  
-        <label for="StreetAddress" class="col-md-4" style="color: silver"><b>Street Address</b></label>  
-        <input type="text" class="form-control" name="StreetAddress" [(ngModel)]="form.StreetAddress" #StreetAddress="ngModel" required />
-        
-      </div>
-        
-       
-
-
-      <div class="form-group">  
-        <label for="City" class="col-md-4" style="color: silver"><b>City</b></label>  
-        <input type="text" class="form-control" name="City" [(ngModel)]="form.City" #City="ngModel" required />
-       
-      </div>
-      
-
-      <div class="form-group">  
-        <label  for="Province"class="col-md-4" style="color: silver" ><b>Province</b></label>  
-        <input type="text" class="form-control" name="Province" [(ngModel)]="form.Province" #Province="ngModel" required />
-       
-      </div>
-      
-
-      
-      <div class="form-group">  
-        <button class="btn btn-secondary">save address</button>
-</div>   
-    </form> 
-    <h1><button class="btn btn-secondary" style="text-align : bold;" (click)="acc.toggle('static-3')">Proceed to order</button></h1>
-</ng-template>
-</ngb-panel>
-
-
-<!--make order-->
-<ngb-panel id="static-3">
   <ng-template ngbPanelTitle>
     <span><b style="color: silver">Order Details </b></span>
   </ng-template>
   <ng-template ngbPanelContent>
-    <form [formGroup]="deliveryForm">
+    <form [formGroup]="deliveryForm" (ngSubmit)="yourSubmitFunction(deliveryForm)">
       <div class="form-group">
         <div class="col-md-12">
-          <h5 style="color: silver" >Name:</h5>  <input type="text" readonly formControlName="UserName" class="form-control"   >
+          <h5 style="color: silver" >Name:</h5>  <input type="text" placeholder="Enter username" formControlName="username" class="form-control"   >
+    
+          <span class="text-muted" *ngIf="deliveryForm.get('username').hasError('required') && deliveryForm.get('username').touched"><p style="color: rgb(252, 4, 4)">username is required</p></span>
         </div>
-        <div class="col-md-12">
+        <div  class="col-md-12">
             <h5 style="color: silver" >Delivery Address:</h5> 
-            <textarea id="textarea" name="textarea" formControlName="DeliveryAddress" class="form-control"  rows="3" cols="15"></textarea>
+            <textarea id="textarea" name="textarea" formControlName="deliveryaddress" placeholder="Enter Delivery Address" class="form-control"  rows="3" cols="15"></textarea>
+            <span class="text-muted" *ngIf="deliveryForm.get('deliveryaddress').hasError('required') && deliveryForm.get('deliveryaddress').touched"><p style="color: rgb(252, 4, 4)">Address is required</p></span>
           </div>
+
+
           <div class="col-md-12">
-              <h5 style="color: silver" >Phone:</h5>  <input type="text" formControlName="Phone" class="form-control"   >
+              <h5 style="color: silver" >Phone:</h5>  <input type="text" placeholder="Enter Cellphone" formControlName="phone" class="form-control"   >
+              <span class="text-muted" *ngIf="deliveryForm.get('phone').hasError('required') && deliveryForm.get('phone').touched"><p style="color: rgb(252, 4, 4)">Phone is required</p></span>
             </div>
+
+
             <div class="col-md-12">
-                <h5 style="color: silver" >Email:</h5>  <input type="text" formControlName="Email" class="form-control"   >
+                <h5 style="color: silver" >Email:</h5>  
+                <input type="email" formControlName="email" placeholder="Enter Email Address" class="form-control"  class="form-control"  required  >
+                    <div *ngIf="email.invalid && !email.pristine">
+                  <p *ngIf="email.errors.email" style="color: red">Valid email is required.</p>
+                </div>
+              <span class="text-muted" *ngIf="deliveryForm.get('email').hasError('required') && deliveryForm.get('email').touched"><p style="color: rgb(252, 4, 4)">Email is required</p></span>
               </div>
+
+
+
               <div class="col-md-12">
-                  <h5 style="color: rgb(204, 199, 199)" >Message:</h5>  <input type="text" formControlName="Message" class="form-control"   >
+                  <h5 style="color: rgb(204, 199, 199)" >Message:</h5>  <input type="text" placeholder="Enter Message" formControlName="message" class="form-control"   >
+                  <span class="text-muted" *ngIf="deliveryForm.get('message').hasError('required') && deliveryForm.get('message').touched"><p style="color: rgb(252, 4, 4)">Message is required</p></span>
                 </div>
                 <div class="col-md-12">
-                    <h5 style="color: silver" >Total Amount To Pay:</h5>  <input type="text" formControlName="Amount" class="form-control"   >
+                    <h5 style="color: silver" >Total Amount To Pay:</h5>  <input type="text" formControlName="amount" class="form-control"  readonly >
+                 
                   </div>
       </div>
-      <button type="button" style="margin-left: 39%;" [disabled]="!deliveryForm.valid" class="btn btn-secondary" (click)="acc.toggle('static-3')"><b>Proceed to pay</b></button>
+      <button type="submit" style="margin-left: 39%;" [disabled]="!deliveryForm.valid" (click)="acc.toggle('static-3')" class="btn btn-secondary" ><b>Proceed</b></button>
     </form>
 </ng-template>
 </ngb-panel>
@@ -170,7 +130,7 @@
             </thead>
             <tr *ngFor="let prod of productAddedTocart;let q = index">
               <td class="text-center">{{prod.prodname}}</td>
-              <td>{{prod.prodprice}}</td>
+              <td>{{prod.prodprice | currency:'R'}}</td>
               <td>{{prod.prodquantity}}</td>
               <td>{{prod.prodprice * prod.prodquantity| currency:'R' }}</td>
             </tr>
@@ -194,11 +154,11 @@
           </tr>
           </thead>
           <tr>
-            <td>{{deliveryForm.value.UserName}}</td>
-            <td>{{deliveryForm.value.DeliveryAddress}}</td>
-            <td>{{deliveryForm.value.Phone}}</td>
-            <td>{{deliveryForm.value.Email}}</td>
-            <td>{{deliveryForm.value.Message}}</td>
+            <td>{{deliveryForm.value.username}}</td>
+            <td>{{deliveryForm.value.deliveryaddress}}</td>
+            <td>{{deliveryForm.value.phone}}</td>
+            <td>{{deliveryForm.value.email}}</td>
+            <td>{{deliveryForm.value.message}}</td>
           </tr>
         </table>
 
@@ -210,7 +170,7 @@
      </tr>
      <tr>
        <td  class="text-center" >
-          <button type="button" class="btn btn-outline-secondary" (click)="ConfirmOrder()"><b>Confirm Order</b></button>
+          <button type="button" class="btn btn-outline-secondary" (click)="ConfirmOrder(); removeChart() "><b>Confirm Order</b></button>
        </td>
      </tr>
    </table>
