@@ -1,15 +1,12 @@
 package com.temosho.application.model;
 
-import java.util.List;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+
 
 @Entity(name = "Orders")
 public class Order {
@@ -21,11 +18,11 @@ public class Order {
 	 
 	   
 	  
-	    private String CustomerName;
-	    private String DeliveryAddress;
+	    private String Username;
+	    private String Deliveryaddress;
 	    private String Phone;
-	    private String OrderPayMethod;
-	    private String PaymentRefrenceId;
+	    private String Orderpaymethod;
+	    private String Paymentrefrenceid;
 	    
 	  
 	    @ManyToOne
@@ -55,23 +52,25 @@ public class Order {
 		}
 
 
-		public String getCustomerName() {
-			return CustomerName;
+
+
+		public String getUsername() {
+			return Username;
 		}
 
 
-		public void setCustomerName(String customerName) {
-			CustomerName = customerName;
+		public void setUsername(String username) {
+			Username = username;
 		}
 
 
-		public String getDeliveryAddress() {
-			return DeliveryAddress;
+		public String getDeliveryaddress() {
+			return Deliveryaddress;
 		}
 
 
-		public void setDeliveryAddress(String deliveryAddress) {
-			DeliveryAddress = deliveryAddress;
+		public void setDeliveryaddress(String deliveryaddress) {
+			Deliveryaddress = deliveryaddress;
 		}
 
 
@@ -85,27 +84,25 @@ public class Order {
 		}
 
 
-		public String getOrderPayMethod() {
-			return OrderPayMethod;
+		public String getOrderpaymethod() {
+			return Orderpaymethod;
 		}
 
 
-		public void setOrderPayMethod(String orderPayMethod) {
-			OrderPayMethod = orderPayMethod;
+		public void setOrderpaymethod(String orderpaymethod) {
+			Orderpaymethod = orderpaymethod;
 		}
 
 
-		public String getPaymentRefrenceId() {
-			return PaymentRefrenceId;
+		public String getPaymentrefrenceid() {
+			return Paymentrefrenceid;
 		}
 
 
-		public void setPaymentRefrenceId(String paymentRefrenceId) {
-			PaymentRefrenceId = paymentRefrenceId;
+		public void setPaymentrefrenceid(String paymentrefrenceid) {
+			Paymentrefrenceid = paymentrefrenceid;
 		}
 
-
-	
 
 		public OrderDetails getOrderdetails() {
 			return orderdetails;
