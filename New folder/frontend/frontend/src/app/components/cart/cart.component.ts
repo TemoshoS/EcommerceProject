@@ -1,15 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators} from '@angular/forms';
 import { Product } from 'src/app/models/product';
 import { ProductService } from 'src/app/services/product.service';
-import { AddressService } from 'src/app/services/address.service';
 import { Alert } from 'src/app/models/alert';
 import { OrderDetails } from 'src/app/models/order-details';
-import { Registration } from 'src/app/models/registration';
+import { User} from 'src/app/models/user';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { OrderService } from 'src/app/services/order.service';
 import { OrderItem } from 'src/app/models/order-item';
-import {Addressinfo} from 'src/app/auth/addressinfo';
+import { Addressinfo } from 'src/app/auth/addressinfo';
+import { AddressService } from 'src/app/services/address.service';
+import { Observable } from 'rxjs'; 
+import { TokenStorageService} from 'src/app/auth/token-storage.service';
+
 
 @Component({
   selector: 'app-cart',
@@ -18,120 +21,208 @@ import {Addressinfo} from 'src/app/auth/addressinfo';
 })
 export class CartComponent implements OnInit {
 
-  form: any = {};  
-  address: Addressinfo;
-
-  dafualtQuantity:number=1;
+  dataSaved = false;  
+  defaultQuantity:number=1;
   productAddedTocart:Product[];
   allTotal:number;
-
-  currentUser: Registration[];
+  currentUser: User[];
   orderDetail:OrderDetails;
   orderItem:OrderItem[];
+  form: any = {};  
+  address: Addressinfo;
+  success:boolean = false;
   
+  
+   
+
   public globalResponse: any;
   public alerts: Array<Alert> = [];
 
   deliveryForm:FormGroup;
 
-  totalSum: number = 0;
 
-  constructor(private productService:ProductService,private fb: FormBuilder,private authService:AuthenticationService,private orderService:OrderService,private addS:AddressService) 
+  constructor(private productService:ProductService,private fb: FormBuilder,private authService:AuthenticationService,private orderService:OrderService,private addS:AddressService,private token:TokenStorageService) 
   {
-     
+    
+   }
+   onSubmit()
+   {
+ 
+   }
+
+   reload()
+   {
+    window.location.reload();
    }
 
   ngOnInit() {
     this.productAddedTocart=this.productService.getProductFromCart();
     for (let i in this.productAddedTocart) {
-      this.productAddedTocart[i].Quantity=1;
+      this.productAddedTocart[i].prodquantity=this.productAddedTocart[i].prodquantity;
    }
    this.productService.removeAllProductFromCart();
    this.productService.addProductToCart(this.productAddedTocart);
    this.calculteAllTotal(this.productAddedTocart);
+  
 
-   this.productAddedTocart.forEach(value => {
-   this.totalSum = this.totalSum + (value.Quantity * value.UnitPrice);
+   this.GetLoggedinUserDetails();
+
+   this.deliveryForm = this.fb.group({
+    username:  ['', [Validators.required]],
+    deliveryaddress:['',[Validators.required]],
+    phone:['',[Validators.required, Validators.minLength(10),Validators.pattern("^[0-9]*$"),Validators.maxLength(10)]],
+    email: ['', [Validators.required, Validators.email]],
+    message:['',[]],
+    amount:['',[Validators.required]],
+
   });
-}
-calculteAllTotal(allItems:Product[])
-{
-  var total=0;
-  for (let i in allItems) {
-    total= total+(allItems[i].Quantity * allItems[i].UnitPrice);
- }
- this.allTotal=total;
 
+  this.deliveryForm.controls['username'].setValue(this.token.getUsername());
+  this.deliveryForm.controls['amount'].setValue(this.allTotal);
+  }
 
+  //delete product by id
+  deletProduct()
+  {
+  this.productService.removeAllProductFromCart();
+  }
 
- this.deliveryForm = this.fb.group({
-  UserName:  ['', [Validators.required]],
-  DeliveryAddress:['',[Validators.required]],
-  Phone:['',[Validators.required]],
-  Email:['',[Validators.required]],
-  Message:['',[]],
-  Amount:['',[Validators.required]],
-
-});
-
-
-}
-
-
-
-onAddQuantity(product:Product)
+  get email() 
+  {
+     return this.deliveryForm.get('email'); 
+  }
+  onAddQuantity(product:Product)
   {
     //Get Product
-  this.productAddedTocart=this.productService.getProductFromCart();
-  this.productAddedTocart.find(p=>p.id==product.id).Quantity = product.Quantity+1;
+    this.dataSaved = true;
+    this.productAddedTocart=this.productService.getProductFromCart();
+    this.productAddedTocart.find(p=>p.id==product.id).prodquantity = product.prodquantity+1;
+    
   this.productService.removeAllProductFromCart();
   this.productService.addProductToCart(this.productAddedTocart);
   this.calculteAllTotal(this.productAddedTocart);
-  this.deliveryForm.controls["Amount"].setValue(this.allTotal);
+  this.deliveryForm.controls['amount'].setValue(this.allTotal);
+  
    
   }
   onRemoveQuantity(product:Product)
   {
+    this.dataSaved = true;
     this.productAddedTocart=this.productService.getProductFromCart();
-    this.productAddedTocart.find(p=>p.id==product.id).Quantity = product.Quantity-1;
+    this.productAddedTocart.find(p=>p.id==product.id). prodquantity = product.prodquantity-1;
     this.productService.removeAllProductFromCart();
     this.productService.addProductToCart(this.productAddedTocart);
     this.calculteAllTotal(this.productAddedTocart);
-    this.deliveryForm.controls['Amount'].setValue(this.allTotal);
+    this.deliveryForm.controls['amount'].setValue(this.allTotal);
+    
 
   }
-
- 
-  onSubmit()
+  calculteAllTotal(allItems:Product[])
   {
-
-    this.address=new Addressinfo(
-      this.form.PostalCode,
-      this.form.StreetAddress,
-      this.form.City,
-      this.form.Province,
-
-
-    );
-   // const formData = new FormData();
-//formData.append('address',JSON.stringify(this.address));
-this.addS.addAddress(this.address).subscribe((response) => {
-  console.log(response);
-  }
-  
-  )
-
+    this.dataSaved = true;
+    let total=0;
+    for (let i in allItems) {
+      total= total+(allItems[i].prodquantity *allItems[i].prodprice);
+   }
+   this.allTotal=total;
+   
   }
 
+  GetLoggedinUserDetails()
+  {
+    this.currentUser=this.authService.getRole();
+            
+  } 
+
+  deleteProduct(id: number){
+
+    this.dataSaved = true;
+     var products = JSON.parse(localStorage["product"]);
+     var i;
+    
+     var x = localStorage.getItem("product");
+    for (i=0;i<products.length;i++)
+               
+    if (products[i].id == id) products.splice(i,1);
+    localStorage["product"] = JSON.stringify(products);
+    localStorage.setItem("product",JSON.stringify(products));
+      
+  }
+
+  resetForm()
+  {
+    this.deliveryForm.reset();
+    this.dataSaved = false;
+  }
+  ConfirmOrder()
+  {
+    const date: Date = new Date();
+    var name=this.token.getUsername();
+    var day = date.getDate();
+    var monthIndex = date.getMonth()+1;
+    var year = date.getFullYear();
+    var minutes = date.getMinutes();
+    var hours = date.getHours();
+    var seconds = date.getSeconds();
+    var dateTimeStamp=day.toString()+"-"+monthIndex.toString()+"-"+year.toString()+" "+hours.toString()+":"+minutes.toString()+":"+seconds.toString();;
+    let orderDetail:any={};
+    
+    //Orderdetail is object which hold all the value, which needs to be saved into database
+    orderDetail.username=this.deliveryForm.controls['username'].value;
+    orderDetail.deliveryaddress=this.deliveryForm.controls['deliveryaddress'].value;
+    orderDetail.phone=this.deliveryForm.controls['phone'].value;
+    orderDetail.paymentrefrenceid= name + dateTimeStamp;
+    orderDetail.orderpaymethod = "Pay On Delivery";
+    orderDetail.totprice = this.deliveryForm.controls['amount'].value;
+    orderDetail.email = this.deliveryForm.controls['email'].value;
+
+    
+    
+    //Assigning the ordered item details
+    this.orderItem=[];
+    for (let i in this.productAddedTocart) {
+      this.orderItem.push({
+        ID:0,
+        ProductID:this.productAddedTocart[i].id,
+       ProductName:this.productAddedTocart[i]. prodname,
+       OrderedQuantity:this.productAddedTocart[i].prodquantity,
+        PerUnitPrice:this.productAddedTocart[i]. prodprice,
+       OrderID:0,
+      }) ;
+   }
+     
+
+   
+ 
+    this.orderService.PlaceOrder(orderDetail)
+            .subscribe((result) => {
+              this.globalResponse = result;              
+            },
+            error => { 
+              console.log(error.message);
+              this.alerts.push({
+                id: 2,
+                type: 'danger',
+                message: 'Something went wrong while placing the order, Please try again.'
+                
+              });
+            },
+            () => {
+                
+                this.alerts.push({
+                  id: 1,
+                  type: 'success',
+                  message: 'Order has been placed succesfully.',
+                  
+                });
+                
+                }
+              )
+
+  }
+  public closeAlert(alert: Alert) {
+    const index: number = this.alerts.indexOf(alert);
+    this.alerts.splice(index, 1);
+} 
 
 }
-  
-
-
-
-
-
-
-
-
-
